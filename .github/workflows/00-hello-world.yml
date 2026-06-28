@@ -11,5 +11,5 @@ jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Hello World
-        run: echo "Hello World2!"
+      - name: Hello World2
+        run: echo "Hello World3!"
