@@ -1,0 +1,52 @@
+name: 05 Job Dependencies (needs)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.set-output.outputs.name }}
+    steps:
+      - name: ビルド処理
+        run: echo "Building..."
+
+      - name: outputをセット
+        id: set-output
+        run: echo "name=my-app-${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+  test-unit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: ユニットテスト
+        run: echo "Running unit tests... artifact=${{ needs.build.outputs.artifact-name }}"
+
+  test-integration:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 統合テスト
+        run: echo "Running integration tests..."
+
+  deploy-staging:
+    # test-unit と test-integration が両方成功してから実行
+    needs: [test-unit, test-integration]
+    runs-on: ubuntu-latest
+    steps:
+      - name: ステージングデプロイ
+        run: echo "Deploying to staging..."
+
+  notify:
+    # 成否に関わらず最後に必ず実行
+    needs: [build, test-unit, test-integration, deploy-staging]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: 全ジョブの結果を確認
+        run: |
+          echo "build: ${{ needs.build.result }}"
+          echo "test-unit: ${{ needs.test-unit.result }}"
+          echo "test-integration: ${{ needs.test-integration.result }}"
+          echo "deploy-staging: ${{ needs.deploy-staging.result }}"

@@ -1,0 +1,66 @@
+name: 07 Environments and Contexts
+
+on:
+  workflow_dispatch: {}
+
+# ワークフローレベルの環境変数（全ジョブ・ステップで参照可能）
+env:
+  APP_NAME: "my-app"
+  NODE_ENV: "production"
+
+jobs:
+  contexts:
+    runs-on: ubuntu-latest
+    # ジョブレベルの環境変数（このジョブ内のみ）
+    env:
+      JOB_VAR: "job-level-value"
+    steps:
+      - name: github コンテキスト
+        run: |
+          echo "=== github context ==="
+          echo "repo: ${{ github.repository }}"
+          echo "owner: ${{ github.repository_owner }}"
+          echo "run_id: ${{ github.run_id }}"
+          echo "run_number: ${{ github.run_number }}"
+          echo "workflow: ${{ github.workflow }}"
+          echo "job: ${{ github.job }}"
+          echo "ref_type: ${{ github.ref_type }}"
+
+      - name: runner コンテキスト
+        run: |
+          echo "=== runner context ==="
+          echo "os: ${{ runner.os }}"
+          echo "arch: ${{ runner.arch }}"
+          echo "name: ${{ runner.name }}"
+          echo "temp: ${{ runner.temp }}"
+
+      - name: env コンテキスト（スコープ確認）
+        # ステップレベルの環境変数（このステップのみ）
+        env:
+          STEP_VAR: "step-level-value"
+        run: |
+          echo "=== env scope ==="
+          echo "Workflow level: $APP_NAME"
+          echo "Job level: $JOB_VAR"
+          echo "Step level: $STEP_VAR"
+
+      - name: GITHUB_OUTPUT / GITHUB_ENV の使い方
+        id: set-vars
+        run: |
+          # ステップ間でoutputを渡す
+          echo "my-output=hello-from-step" >> $GITHUB_OUTPUT
+
+          # 後続ステップの環境変数をセット
+          echo "DYNAMIC_VAR=set-by-previous-step" >> $GITHUB_ENV
+
+      - name: outputとGITHUB_ENVを確認
+        run: |
+          echo "output: ${{ steps.set-vars.outputs.my-output }}"
+          echo "GITHUB_ENV: $DYNAMIC_VAR"
+
+      - name: GITHUB_STEP_SUMMARY に書き込む
+        run: |
+          echo "## 実行サマリー" >> $GITHUB_STEP_SUMMARY
+          echo "- App: $APP_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- Run: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

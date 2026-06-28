@@ -1,0 +1,37 @@
+name: 01 Push and PR Triggers
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "src/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  show-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: イベント情報を表示
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "SHA: ${{ github.sha }}"
+
+      - name: PRのときだけ実行
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR number: ${{ github.event.pull_request.number }}"
+          echo "PR title: ${{ github.event.pull_request.title }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Head branch: ${{ github.head_ref }}"

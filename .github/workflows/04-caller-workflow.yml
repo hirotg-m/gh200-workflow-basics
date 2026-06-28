@@ -1,0 +1,21 @@
+name: 04 Caller (再利用可能ワークフローの呼び出し側)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  call-reusable:
+    # 同リポジトリの再利用可能ワークフローを呼び出す
+    uses: ./.github/workflows/04-reusable-workflow.yml
+    with:
+      app-name: "my-app"
+      deploy-env: "staging"
+    secrets:
+      deploy-token: ${{ secrets.GITHUB_TOKEN }}
+
+  use-output:
+    needs: call-reusable
+    runs-on: ubuntu-latest
+    steps:
+      - name: 呼び出し先のoutputを使う
+        run: echo "Deployed URL: ${{ needs.call-reusable.outputs.deploy-url }}"

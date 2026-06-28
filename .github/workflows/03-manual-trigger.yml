@@ -1,0 +1,40 @@
+name: 03 Manual Trigger (workflow_dispatch)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "デプロイ先環境"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      run-tests:
+        description: "テストを実行するか"
+        required: false
+        type: boolean
+        default: true
+      version:
+        description: "バージョン番号（例: 1.2.3）"
+        required: false
+        type: string
+
+jobs:
+  manual-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 入力値を確認
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Run tests: ${{ inputs.run-tests }}"
+          echo "Version: ${{ inputs.version }}"
+
+      - name: productionのときは確認メッセージ
+        if: inputs.environment == 'production'
+        run: echo "本番環境へのデプロイです！"
+
+      - name: テスト実行（有効な場合のみ）
+        if: inputs.run-tests == true
+        run: echo "テストを実行中..."

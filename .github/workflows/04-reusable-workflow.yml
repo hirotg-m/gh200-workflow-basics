@@ -1,0 +1,41 @@
+name: 04 Reusable Workflow (workflow_call)
+
+# このワークフローは他のワークフローから呼び出される（再利用可能ワークフロー）
+# workflow_call を使うと、同リポジトリ・別リポジトリから uses: で呼び出せる
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: "アプリケーション名"
+        required: true
+        type: string
+      deploy-env:
+        description: "デプロイ先環境"
+        required: false
+        type: string
+        default: "staging"
+    secrets:
+      deploy-token:
+        description: "デプロイ用トークン"
+        required: false
+    outputs:
+      deploy-url:
+        description: "デプロイ先URL"
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.set-url.outputs.url }}
+    steps:
+      - name: デプロイ処理（ダミー）
+        run: |
+          echo "Deploying ${{ inputs.app-name }} to ${{ inputs.deploy-env }}"
+
+      - name: URLをoutputにセット
+        id: set-url
+        run: echo "url=https://${{ inputs.deploy-env }}.example.com" >> $GITHUB_OUTPUT
+
+      - name: 結果を表示
+        run: echo "Deployed to ${{ steps.set-url.outputs.url }}"
