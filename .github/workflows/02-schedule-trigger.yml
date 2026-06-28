@@ -1,0 +1,24 @@
+name: 02 Schedule Trigger
+
+on:
+  schedule:
+    # UTC で指定。JST = UTC+9 なので JST 09:00 = UTC 00:00
+    - cron: "0 0 * * 1-5"   # 平日 JST 09:00 に実行
+  workflow_dispatch: {}      # 手動実行で動作確認用
+
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: トリガー種別を表示
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Schedule    : ${{ github.event.schedule }}"
+
+      - name: スケジュール実行のときだけ
+        if: github.event_name == 'schedule'
+        run: echo "これはスケジュール実行です"
+
+      - name: 手動実行のときだけ
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "これは手動実行です"
