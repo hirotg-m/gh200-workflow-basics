@@ -1,0 +1,15 @@
+name: 00 Hello World
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello World
+        run: echo "Hello World!"
